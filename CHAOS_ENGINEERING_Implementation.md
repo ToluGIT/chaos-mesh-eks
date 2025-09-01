@@ -58,34 +58,6 @@ IRSA enables secure integration with AWS services during chaos experiments witho
 
 Rather than using a simple single-service application, let's work with a multi-tier system that in some way mirrors microservices environments. This design choice is important for chaos engineering experiments.
 
-```yaml
-                    ┌─── LoadBalancer ───┐
-                    │                   │
-                    ▼                   ▼
-┌─────────────────────────┐    ┌─────────────────────────┐
-│      Frontend Tier      │───▶│     Backend API Tier    │
-│        (nginx)          │    │       (httpd)           │
-│      2 replicas         │    │      3 replicas         │
-│                         │    │                         │
-│ - Static content        │    │ - REST API endpoints    │
-│ - Reverse proxy         │    │ - Business logic        │
-│ - Health checks         │    │ - Database queries      │
-│ - Timeout configs       │    │ - Error handling        │
-└─────────────────────────┘    └─────────────────────────┘
-                                          │
-                                          ▼
-                                ┌─────────────────────────┐
-                                │     Database Tier       │
-                                │       (redis)           │
-                                │      1 replica          │
-                                │                         │
-                                │ - Data persistence      │
-                                │ - Caching layer         │
-                                │ - Connection pooling    │
-                                │ - Backup/recovery       │
-                                └─────────────────────────┘
-```
-
 
 Let's walk through how each tier of our application was designed to reveal different aspects of system resilience.
 
@@ -271,31 +243,6 @@ The Chaos Mesh dashboard provides visual experiment management with:
 - Historical experiment analysis
 
 ![alt text](6.png)
- ................
-## Monitoring & Observability
-
-### CloudWatch Integration and Key Metrics
-
- Integrating with AWS CloudWatch gives us enterprise-grade observability during chaos experiments. CloudWatch becomes essential for understanding the full impact of our chaos testing and provides the foundation for automated experiment controls.
-
-**Essential CloudWatch Metrics to Monitor:**
-
-For EKS clusters, enable Container Insights to get detailed pod and node metrics. During chaos experiments, focus on these key metric categories:
-
-**Application Performance Metrics:**
-- `ContainerInsights/ResponseTime` - Track API response time increases during network chaos
-- `ContainerInsights/RequestCount` - Monitor request volume changes when pods fail
-- `ContainerInsights/ErrorRate` - Watch for error spikes during database partitioning
-- `AWS/ApplicationELB/ResponseTime` - LoadBalancer response times (if using ALB)
-
-**Infrastructure Health Metrics:**
-- `ContainerInsights/CPUUtilization` - CPU spikes when pods restart after kills
-- `ContainerInsights/MemoryUtilization` - Memory pressure during resource exhaustion tests  
-- `ContainerInsights/NetworkRxBytes/NetworkTxBytes` - Network traffic patterns during chaos
-- `AWS/EKS/cluster_failed_request_count` - EKS API failures during node failures
-
-
-These safety alarms ensure that chaos experiments don't cause extended outages and provide automatic circuit breakers for your testing.
 
 Now let's deploy our application for the test
 
