@@ -1,0 +1,17 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: basic-pod-kill
+  namespace: chaos-mesh
+  annotations:
+    chaos.alpha.kubernetes.io/experiment: "pod-resilience-test"
+spec:
+  action: pod-kill
+  mode: one                     # Kill only one pod at a time
+  duration: "60s"               # Run for 1 minute to observe recovery
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: backend-api           # Target our backend services
+  # The killed pod should be recreated automatically by the Deployment

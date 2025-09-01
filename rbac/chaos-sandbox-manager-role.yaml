@@ -1,0 +1,43 @@
+# Namespace-scoped write permissions for chaos-sandbox experiments
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: chaos-sandbox-manager
+  namespace: chaos-sandbox
+  labels:
+    app: chaos-mesh
+    component: rbac
+    scope: chaos-sandbox
+rules:
+# Full chaos resource management in sandbox
+- apiGroups: ["chaos-mesh.org"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+# Pod and service management for testing
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "services", "events"]
+  verbs: ["get", "list", "watch"]
+# Deployment monitoring for recovery validation
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+---
+# Additional role for chaos-mesh namespace (experiment creation)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: chaos-experiment-creator
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    component: rbac
+    scope: chaos-mesh
+rules:
+# Chaos experiment management
+- apiGroups: ["chaos-mesh.org"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+# Workflow and schedule management  
+- apiGroups: ["chaos-mesh.org"]
+  resources: ["workflows", "schedules"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

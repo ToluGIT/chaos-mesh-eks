@@ -1,0 +1,22 @@
+# Cluster-level read permissions for Chaos Mesh dashboard functionality
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: chaos-manager-global-viewer
+  labels:
+    app: chaos-mesh
+    component: rbac
+    managed-by: chaos-engineering-team
+rules:
+# Global read access to chaos resources (required for dashboard)
+- apiGroups: ["chaos-mesh.org"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+# Namespace discovery for dashboard navigation
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch"]
+# Pod and event visibility for experiment monitoring
+- apiGroups: [""]
+  resources: ["pods", "events"]
+  verbs: ["get", "list", "watch"]

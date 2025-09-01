@@ -1,0 +1,222 @@
+# Multi-Stage Chaos Engineering Workflow
+# Orchestrates complex failure scenarios with recovery observation
+# Demonstrates enterprise-grade chaos testing capabilities
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: comprehensive-resilience-test
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    workflow-type: comprehensive-testing
+    target-namespace: chaos-sandbox
+  annotations:
+    chaos-mesh.org/workflow-description: "Multi-stage resilience testing workflow"
+    chaos-mesh.org/estimated-duration: "8 minutes"
+    chaos-mesh.org/safety-level: "controlled-sandbox-only"
+spec:
+  entry: resilience-test-pipeline
+  templates:
+  
+  # Main workflow pipeline
+  - name: resilience-test-pipeline
+    templateType: Serial
+    deadline: 10m              # Maximum workflow duration
+    children:
+      - baseline-measurement
+      - network-stress-phase
+      - recovery-observation-1
+      - pod-failure-phase  
+      - recovery-observation-2
+      - combined-stress-phase
+      - final-recovery-validation
+
+  # Phase 1: Baseline measurement
+  - name: baseline-measurement
+    templateType: Suspend
+    deadline: 30s
+    suspend:
+      duration: "30s"
+    # This phase allows system to stabilize and establish baseline metrics
+
+  # Phase 2: Network stress testing
+  - name: network-stress-phase
+    templateType: Parallel
+    deadline: 2m
+    children:
+      - network-latency-injection
+      - network-packet-loss
+
+  - name: network-latency-injection
+    templateType: NetworkChaos
+    deadline: 90s
+    networkChaos:
+      action: delay
+      mode: fixed-percent
+      value: "50"             # Affect 50% of pods
+      selector:
+        namespaces:
+          - chaos-sandbox
+        labelSelectors:
+          app: web
+      delay:
+        latency: "50ms"
+        correlation: "80"
+        jitter: "5ms"
+      direction: both
+
+  - name: network-packet-loss
+    templateType: NetworkChaos  
+    deadline: 90s
+    networkChaos:
+      action: loss
+      mode: one
+      selector:
+        namespaces:
+          - chaos-sandbox
+        labelSelectors:
+          app: web
+      loss:
+        loss: "5"             # 5% packet loss
+        correlation: "25"
+      direction: both
+
+  # Phase 3: Recovery observation
+  - name: recovery-observation-1
+    templateType: Suspend
+    deadline: 60s
+    suspend:
+      duration: "60s"
+    # Observe system recovery from network stress
+
+  # Phase 4: Pod failure testing
+  - name: pod-failure-phase
+    templateType: PodChaos
+    deadline: 90s
+    podChaos:
+      action: pod-kill
+      mode: fixed-percent
+      value: "33"             # Kill 1/3 of pods
+      selector:
+        namespaces:
+          - chaos-sandbox
+        labelSelectors:
+          app: web
+        annotationSelectors:
+          chaos-mesh.org/inject: "enabled"
+
+  # Phase 5: Recovery observation  
+  - name: recovery-observation-2
+    templateType: Suspend
+    deadline: 90s
+    suspend:
+      duration: "90s"
+    # Extended recovery observation for pod replacement
+
+  # Phase 6: Combined stress (the ultimate test)
+  - name: combined-stress-phase
+    templateType: Parallel
+    deadline: 2m
+    children:
+      - stress-cpu-memory
+      - stress-network-delay
+
+  - name: stress-cpu-memory
+    templateType: StressChaos
+    deadline: 90s
+    stressChaos:
+      mode: one
+      selector:
+        namespaces:
+          - chaos-sandbox
+        labelSelectors:
+          app: web
+      stressors:
+        cpu:
+          workers: 2
+          load: 80            # 80% CPU load
+        memory:
+          workers: 1  
+          size: "128MB"       # Memory pressure
+
+  - name: stress-network-delay
+    templateType: NetworkChaos
+    deadline: 90s
+    networkChaos:
+      action: delay
+      mode: one
+      selector:
+        namespaces:
+          - chaos-sandbox
+        labelSelectors:
+          app: web
+      delay:
+        latency: "200ms"      # Higher latency during stress
+        correlation: "90"
+        jitter: "20ms"
+      direction: both
+
+  # Phase 7: Final recovery and validation
+  - name: final-recovery-validation
+    templateType: Suspend
+    deadline: 2m
+    suspend:
+      duration: "2m"
+    # Final observation period to ensure complete recovery
+
+---
+# Simplified Workflow for Quick Testing
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow  
+metadata:
+  name: quick-resilience-check
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    workflow-type: quick-test
+    target-namespace: chaos-sandbox
+spec:
+  entry: quick-test-pipeline
+  templates:
+  
+  - name: quick-test-pipeline
+    templateType: Serial
+    deadline: 5m
+    children:
+      - quick-pod-kill
+      - quick-recovery-check
+      - quick-network-test
+
+  - name: quick-pod-kill
+    templateType: PodChaos
+    deadline: 30s
+    podChaos:
+      action: pod-kill
+      mode: one
+      selector:
+        namespaces:
+          - chaos-sandbox
+        labelSelectors:
+          app: web
+
+  - name: quick-recovery-check
+    templateType: Suspend
+    deadline: 60s
+    suspend:
+      duration: "60s"
+
+  - name: quick-network-test
+    templateType: NetworkChaos
+    deadline: 30s
+    networkChaos:
+      action: delay
+      mode: one
+      selector:
+        namespaces:
+          - chaos-sandbox
+        labelSelectors:
+          app: web
+      delay:
+        latency: "100ms"
+        correlation: "100"
+      direction: both

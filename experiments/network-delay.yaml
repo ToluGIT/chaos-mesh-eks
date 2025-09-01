@@ -1,0 +1,21 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: simple-network-delay
+  namespace: chaos-mesh
+  annotations:
+    chaos.alpha.kubernetes.io/experiment: "basic-network-delay"
+spec:
+  action: delay
+  mode: one                    # Affect one pod at a time
+  duration: "60s"              # 1 minute test
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: backend-api          # Target our backend services
+  delay:
+    latency: "500ms"           # More noticeable delay
+    correlation: "90"          # 90% of packets affected
+    jitter: "100ms"            # Add realistic jitter
+  direction: both              # Affect both directions

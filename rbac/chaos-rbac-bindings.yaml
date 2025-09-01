@@ -1,0 +1,60 @@
+# RBAC bindings for chaos-manager service account
+# This file connects the service account to the roles for secure chaos engineering
+
+# Cluster-level binding for global read access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: chaos-manager-global-viewer-binding
+  labels:
+    app: chaos-mesh
+    component: rbac
+    binding-type: cluster-level
+subjects:
+- kind: ServiceAccount
+  name: chaos-manager
+  namespace: chaos-sandbox
+roleRef:
+  kind: ClusterRole
+  name: chaos-manager-global-viewer
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Sandbox namespace binding for experiment management
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: chaos-sandbox-manager-binding
+  namespace: chaos-sandbox
+  labels:
+    app: chaos-mesh
+    component: rbac
+    binding-type: namespace-level
+subjects:
+- kind: ServiceAccount
+  name: chaos-manager
+  namespace: chaos-sandbox
+roleRef:
+  kind: Role
+  name: chaos-sandbox-manager
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Chaos-mesh namespace binding for experiment creation
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: chaos-experiment-creator-binding
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    component: rbac
+    binding-type: namespace-level
+subjects:
+- kind: ServiceAccount
+  name: chaos-manager
+  namespace: chaos-sandbox
+roleRef:
+  kind: Role
+  name: chaos-experiment-creator
+  apiGroup: rbac.authorization.k8s.io

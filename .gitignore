@@ -1,0 +1,299 @@
+ignore file for multi-environment DevSecOps project
+
+# ============================================
+# Environment and Secrets (CRITICAL)
+# ============================================
+.env
+.env.*
+!.env.example
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+*-key.json
+*-credentials.json
+kubeconfig
+.kube/
+
+# ============================================
+# Node.js / JavaScript
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+.npm
+.eslintcache
+.node_repl_history
+.yarn-integrity
+.cache
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.turbo/
+.vite/
+.parcel-cache/
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================
+# Terraform
+# ============================================
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# ============================================
+# Ansible
+# ============================================
+*.retry
+ansible.log
+.ansible/
+vault-password.txt
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+.docker/
+
+# ============================================
+# Kubernetes
+# ============================================
+*.kubeconfig
+helm-charts/**/charts/
+helm-charts/**/tmpcharts/
+
+# ============================================
+# IDE and Editors
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.AppleDouble
+.LSOverride
+Icon
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# ============================================
+# Logs and Databases
+# ============================================
+logs/
+*.log
+!logs/.gitkeep
+*.sql
+*.sqlite
+*.db
+
+# ============================================
+# Testing and Coverage
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+htmlcov/
+.pytest_cache/
+.phpunit.result.cache
+test-results/
+jest-results/
+
+# ============================================
+# Security Scanning Results
+# ============================================
+*-scan-results.*
+security-report.*
+*.sarif
+trivy-results.*
+sonarqube-results/
+.sonar/
+
+# ============================================
+# Monitoring and Observability
+# ============================================
+grafana/data/
+prometheus/data/
+elasticsearch/data/
+.metrics/
+
+# ============================================
+# Temporary Files
+# ============================================
+tmp/
+temp/
+.tmp/
+.temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.rej
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# Package Files
+# ============================================
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ============================================
+# Certificates (keep only examples)
+# ============================================
+*.p12
+*.pfx
+!example.*
+!*.example.*
+
+# ============================================
+# Documentation Build
+# ============================================
+site/
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# ============================================
+# CI/CD
+# ============================================
+.github/workflows/secrets/
+.gitlab-ci-local/
+jenkins-home/
+
+# ============================================
+# Project Specific
+# ============================================
+# Allow example configurations
+!**/*.example
+!**/*.sample
+!**/*.template
+
+# Keep important empty directories
+!logs/.gitkeep
+!data/.gitkeep
+
+# Ignore actual data but keep structure
+data/*
+!data/.gitkeep
+
+# Local development overrides
+local-config/
+*.local.*
+
+# Performance test results
+performance-results/
+load-test-results/
+
+# Backup files
+backup/
+backups/
+*.backup
+
+# Cache directories
+.cache/
+cache/
+
+# Build artifacts
+artifacts/
+target/
+
+# Dependency directories
+vendor/
+
+# Local SSL certificates (development)
+ssl/
+certs/
+!ssl/.gitkeep
+!certs/.gitkeep
+
+whatneeded
+require
+
+# ============================================
+# Chaos Engineering Test Files
+# ============================================
+# Temporary chaos experiment files
+degrade.yaml
+latency.yaml
+packet.yaml
+networkpart.yaml
+
+# Service account kubeconfig files (contain sensitive tokens)
+sa-kubeconfig
+sa-kubeconfig-new
+
+# Temporary test YAML files
+nginx.yaml
+rbac.yaml
+
+# Draft documentation files (keeping only the final portfolio version)
+chaos-mesh-eks-guide.md
+SIMPLE_CHAOS_WALKTHROUGH.md
+CHAOS_ENGINEERING.md
+COMPREHENSIVE_CHAOS_ENGINEERING_GUIDE.md
+REPLICATE_CHAOS_LAB.md

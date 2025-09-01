@@ -1,0 +1,122 @@
+# Network Chaos Experiments
+# Tests application resilience under various network conditions
+# Restricted to chaos-sandbox namespace for safety
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: web-network-delay-test
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    experiment-type: network-delay
+    target-namespace: chaos-sandbox
+  annotations:
+    chaos-mesh.org/experiment-description: "Injects network latency to test service resilience"
+    chaos-mesh.org/expected-impact: "Increased response times, timeout handling validation"
+spec:
+  # Network delay configuration
+  action: delay
+  mode: one                   # Affect one pod at a time
+  duration: "2m"             # 2-minute test duration
+  
+  # Delay parameters  
+  delay:
+    latency: "100ms"          # Add 100ms latency
+    correlation: "100"        # 100% correlation (consistent delay)
+    jitter: "10ms"           # ±10ms variance for realism
+  
+  # Safety selector
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: web
+      version: v1
+  
+  # Network direction (both ingress and egress)
+  direction: both
+
+---
+# Network Partition Test (more severe)
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: web-network-partition-test
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    experiment-type: network-partition
+    target-namespace: chaos-sandbox
+spec:
+  action: partition
+  mode: fixed-percent
+  value: "33"               # Partition 33% of pods
+  duration: "90s"
+  
+  # Partition configuration
+  direction: both
+  
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: web
+
+---
+# Network Loss Test
+apiVersion: chaos-mesh.org/v1alpha1  
+kind: NetworkChaos
+metadata:
+  name: web-network-loss-test
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    experiment-type: network-loss
+    target-namespace: chaos-sandbox
+spec:
+  action: loss
+  mode: one
+  duration: "60s"
+  
+  # Packet loss configuration
+  loss:
+    loss: "10"              # 10% packet loss
+    correlation: "25"       # 25% correlation
+  
+  direction: both
+  
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: web
+
+---
+# Bandwidth Limitation Test
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: web-bandwidth-limit-test
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    experiment-type: bandwidth-limit
+    target-namespace: chaos-sandbox
+spec:
+  action: bandwidth
+  mode: one
+  duration: "2m"
+  
+  # Bandwidth limitation
+  bandwidth:
+    rate: "1mbps"           # Limit to 1 Mbps
+    limit: 20971520        # Buffer limit (20MB)
+    buffer: 10000          # Buffer size
+  
+  direction: both
+  
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: web

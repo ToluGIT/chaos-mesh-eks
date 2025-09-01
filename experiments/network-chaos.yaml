@@ -1,0 +1,144 @@
+# Network Chaos Scenarios
+# These tests simulate network conditions
+---
+# Scenario 1: High Latency Between Frontend and Backend
+# Simulates slow API responses that users would notice
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-high-latency
+  namespace: chaos-mesh
+  annotations:
+    chaos.alpha.kubernetes.io/experiment: "high-latency-api"
+spec:
+  action: delay
+  mode: all  # Affect all frontend pods
+  duration: "120s"  # 2 minutes to observe impact
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: frontend-app  # Target frontend pods
+  delay:
+    latency: "2000ms"    # 2000ms delay - users will notice this
+    correlation: "90"   # 90% of packets affected
+    jitter: "100ms"     # Add realistic jitter
+  direction: to        # Only outgoing traffic (to backend)
+  target:
+    mode: all
+    selector:
+      namespaces:
+        - chaos-sandbox
+      labelSelectors:
+        app: backend-api  # Only affect traffic to backend
+
+---
+# Scenario 2: Intermittent Network Loss
+# Simulates packet loss that causes timeouts and retries
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: packet-loss-scenario
+  namespace: chaos-mesh
+  annotations:
+    chaos.alpha.kubernetes.io/experiment: "packet-loss"
+spec:
+  action: loss
+  mode: one  # Affect one backend pod at a time
+  duration: "90s"
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: backend-api
+  loss:
+    loss: "15"         # 15% packet loss
+    correlation: "50"  # Realistic correlation
+  direction: both      # Affect both directions
+  target:
+    mode: all
+    selector:
+      namespaces:
+        - chaos-sandbox
+      labelSelectors:
+        app: frontend-app  # Target frontend talking to backend
+
+---
+# Scenario 3: Network Partition
+# Simulates complete network isolation - most severe scenario
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: database-partition
+  namespace: chaos-mesh
+  annotations:
+    chaos.alpha.kubernetes.io/experiment: "database-isolation"
+spec:
+  action: partition
+  mode: all
+  duration: "60s"  # Short duration - this completely breaks the app
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: database
+  direction: both
+  target:
+    mode: all
+    selector:
+      namespaces:
+        - chaos-sandbox
+      labelSelectors:
+        app: backend-api
+
+---
+# Scenario 4: Bandwidth Limitation
+# Simulates slow network conditions 
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: bandwidth-limit
+  namespace: chaos-mesh
+  annotations:
+    chaos.alpha.kubernetes.io/experiment: "bandwidth-throttling"
+spec:
+  action: bandwidth
+  mode: all
+  duration: "180s"  # 3 minutes
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      tier: frontend  # Affect all frontend traffic
+  bandwidth:
+    rate: "1mbps"     # Limit to 1 Mbps (slow connection)
+    limit: 20971520   # 20MB buffer
+    buffer: 10000     # 10KB buffer
+  direction: both
+
+---
+# Scenario 5: Progressive Degradation
+# Starts with small delay and gradually increases
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: progressive-delay
+  namespace: chaos-mesh
+  annotations:
+    chaos.alpha.kubernetes.io/experiment: "progressive-degradation"
+spec:
+  action: delay
+  mode: all
+  duration: "300s"  # 5 minutes total
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: backend-api
+  delay:
+    latency: "50ms"    # Start small
+    correlation: "100"
+    jitter: "10ms"
+  direction: both
+  # For progressive testing, you'd run multiple experiments
+  # with increasing latency values: 50ms -> 200ms -> 1000ms -> 3000ms

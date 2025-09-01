@@ -1,0 +1,84 @@
+# Controlled Pod Failure Experiment
+# Tests Kubernetes self-healing and service resilience
+# Only affects chaos-sandbox namespace for safety
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: web-pod-failure-test
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    experiment-type: pod-failure
+    target-namespace: chaos-sandbox
+  annotations:
+    chaos-mesh.org/experiment-description: "Validates application resilience during pod failures"
+    chaos-mesh.org/blast-radius: "chaos-sandbox namespace only"
+    chaos-mesh.org/expected-recovery-time: "< 30 seconds"
+spec:
+  # Experiment configuration
+  action: pod-failure
+  mode: one                    # Only affect one pod at a time
+  duration: "60s"             # Experiment duration
+  
+  # Safety selector - ONLY affects chaos-sandbox namespace
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: web
+      chaos-target: "true"
+  
+  # Scheduling configuration
+  scheduler:
+    cron: ""                  # Manual execution only, no automatic scheduling
+
+---
+# Alternative: Pod Kill Experiment (more aggressive)
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: web-pod-kill-test
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    experiment-type: pod-kill
+    target-namespace: chaos-sandbox
+spec:
+  action: pod-kill
+  mode: fixed-percent         # Percentage-based selection
+  value: "33"                # Kill 33% of matching pods (1 out of 3)
+  duration: "30s"
+  
+  # Strict safety selector
+  selector:
+    namespaces:
+      - chaos-sandbox
+    labelSelectors:
+      app: web
+    annotationSelectors:
+      chaos-mesh.org/inject: "enabled"
+
+---
+# Pod Container Kill (even more specific)  
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: web-container-kill-test
+  namespace: chaos-mesh
+  labels:
+    app: chaos-mesh
+    experiment-type: container-kill
+    target-namespace: chaos-sandbox
+spec:
+  action: container-kill
+  mode: one
+  duration: "45s"
+  containerNames: ["nginx"]   # Target specific container
+  
+  selector:
+    namespaces:
+      - chaos-sandbox  
+    labelSelectors:
+      app: web
+    fieldSelectors:
+      "status.phase": "Running"  # Only target running pods

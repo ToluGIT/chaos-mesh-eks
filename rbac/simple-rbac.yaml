@@ -1,0 +1,32 @@
+# Simple RBAC for Chaos Mesh dashboard (used by SIMPLE_CHAOS_WALKTHROUGH.md)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: chaos-manager
+rules:
+# Chaos Mesh resources
+- apiGroups: ["chaos-mesh.org"]
+  resources: ["*"]
+  verbs: ["*"]
+# Basic Kubernetes resources needed for experiments
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: chaos-manager-binding
+subjects:
+- kind: ServiceAccount
+  name: chaos-manager
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: chaos-manager
+  apiGroup: rbac.authorization.k8s.io
+
